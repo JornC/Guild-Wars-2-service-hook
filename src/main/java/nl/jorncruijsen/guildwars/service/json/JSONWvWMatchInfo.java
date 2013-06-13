@@ -1,10 +1,12 @@
 package nl.jorncruijsen.guildwars.service.json;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class JSONWvWMatchInfo {
   private String match_id;
   private int[] scores;
+  private ArrayList<JSONWvWMap> maps;
 
   public int[] getScores() {
     return scores;
@@ -16,6 +18,6 @@ public class JSONWvWMatchInfo {
 
   @Override
   public String toString() {
-    return "JSONWvWMatchInfo [match_id=" + match_id + ", scores=" + Arrays.toString(scores) + "]";
+    return "JSONWvWMatchInfo [match_id=" + match_id + ", scores=" + Arrays.toString(scores) + ", maps=" + maps + "]";
   }
 }

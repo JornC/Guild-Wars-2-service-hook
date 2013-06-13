@@ -9,7 +9,6 @@ public class World {
   private String name;
   private TYPE type;
   private WvWMatch match;
-  private int score;
 
   public WvWMatch getMatch() {
     return match;
@@ -43,16 +42,8 @@ public class World {
     return type;
   }
 
-  public void setScore(int score) {
-    this.score = score;
-  }
-
-  public int getScore() {
-    return score;
-  }
-
   @Override
   public String toString() {
-    return "World [id=" + id + ", name=" + name + ", type=" + type + ", score=" + score + "]";
+    return "World [id=" + id + ", name=" + name + ", type=" + type + "]";
   }
 }

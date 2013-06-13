@@ -7,8 +7,8 @@ import nl.jorncruijsen.guildwars.service.domain.World.TYPE;
 
 public class WvWMatch {
   private String id;
-  
   private final Map<TYPE, World> worlds = new HashMap<>();
+  private final Map<TYPE, Integer> scores = new HashMap<>();
   
   public World getWorld(TYPE type) {
     return worlds.get(type);
@@ -18,10 +18,6 @@ public class WvWMatch {
     worlds.put(type, world);
   }
   
-  public void setScore(TYPE type, int score) {
-    
-  }
-
   public String getId() {
     return id;
   }
@@ -32,6 +28,10 @@ public class WvWMatch {
 
   public void addWorld(World world) {
     setWorld(world.getType(), world);
+  }
+
+  public void setScore(TYPE type, int i) {
+    scores .put(type, i);
   }
 
   @Override

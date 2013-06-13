@@ -14,6 +14,7 @@ import nl.jorncruijsen.guildwars.service.json.JSONWvWMatchInfo;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class GuildWarsServiceRetriever {
@@ -84,12 +85,15 @@ public class GuildWarsServiceRetriever {
   public void retrieveMatchInfo(WvWMatch match) {
     InputStream is = URLRetriever.getContent(MATCH_DETAILS_URL + match.getId());
     InputStreamReader content = new InputStreamReader(is);
-    JSONWvWMatchInfo obj = gson.fromJson(parser.parse(content).getAsJsonObject(), JSONWvWMatchInfo.class);
+    JsonObject parsed = parser.parse(content).getAsJsonObject();
+
+    JSONWvWMatchInfo obj = gson.fromJson(parsed, JSONWvWMatchInfo.class);
     int[] scores = obj.getScores();
-    
-    match.getWorld(TYPE.RED).setScore(scores[0]);
-    match.getWorld(TYPE.GREEN).setScore(scores[1]);
-    match.getWorld(TYPE.BLUE).setScore(scores[2]);
+
+    // Set world scores
+    match.setScore(TYPE.RED, scores[0]);
+    match.setScore(TYPE.GREEN, scores[1]);
+    match.setScore(TYPE.BLUE, scores[2]);
 
     System.out.println(obj);
   }
