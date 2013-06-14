@@ -16,8 +16,12 @@ public class JSONWvWMatchInfo {
     return match_id;
   }
 
+  public ArrayList<JSONWvWMap> getMaps() {
+    return maps;
+  }
+
   @Override
   public String toString() {
-    return "JSONWvWMatchInfo [match_id=" + match_id + ", scores=" + Arrays.toString(scores) + ", maps=" + maps + "]";
+    return "JSONWvWMatchInfo [match_id=" + match_id + ", scores=" + Arrays.toString(scores) + ", maps=" + getMaps() + "]";
   }
 }

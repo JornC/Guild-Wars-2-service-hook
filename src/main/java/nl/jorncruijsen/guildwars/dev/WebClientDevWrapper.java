@@ -18,10 +18,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * To avoid SSL nonsense, we'll be mocking a trust manager that will never
  * complain about certificates.
  * 
- * Future sugar to avoid doing this. It will involve configuration, so, ugh.
+ * Future sugar to avoid doing this.
  */
 public class WebClientDevWrapper {
 
+  @SuppressWarnings("deprecation")
   public static HttpClient wrapClient(HttpClient base) {
     try {
       SSLContext ctx = SSLContext.getInstance("TLS");

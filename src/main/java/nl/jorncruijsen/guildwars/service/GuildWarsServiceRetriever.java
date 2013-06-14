@@ -2,21 +2,27 @@ package nl.jorncruijsen.guildwars.service;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import nl.jorncruijsen.guildwars.service.domain.World;
 import nl.jorncruijsen.guildwars.service.domain.World.TYPE;
+import nl.jorncruijsen.guildwars.service.domain.WvWMap;
 import nl.jorncruijsen.guildwars.service.domain.WvWMatch;
+import nl.jorncruijsen.guildwars.service.domain.WvWObjective;
 import nl.jorncruijsen.guildwars.service.json.JSONWorldName;
+import nl.jorncruijsen.guildwars.service.json.JSONWvWMap;
 import nl.jorncruijsen.guildwars.service.json.JSONWvWMatch;
 import nl.jorncruijsen.guildwars.service.json.JSONWvWMatchInfo;
+import nl.jorncruijsen.guildwars.service.json.JSONWvWObjective;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+@SuppressWarnings("deprecation")
 public class GuildWarsServiceRetriever {
   private static final String WORLD_NAMES = "https://api.guildwars2.com/v1/world_names.json";
   private static final String MATCH_OVERVIEW_URL = "https://api.guildwars2.com/v1/wvw/matches.json";
@@ -37,19 +43,22 @@ public class GuildWarsServiceRetriever {
    * Retrieve match and world info.
    */
   public void init() {
-    System.out.println("Retrieving world names.");
+    System.out.println("Retrieving world names...");
     Map<Integer, JSONWorldName> worldNames = retrieveWorldNames();
+    System.out.println("Done.");
 
-    System.out.println("Retrieving match overview.");
+    System.out.println("Retrieving match overview...");
     Map<String, JSONWvWMatch> matchOverview = retrieveMatchOverview();
+    System.out.println("Done.");
 
     // Stitch world info to match info
     stitch(worldNames, matchOverview);
 
-    System.out.println("Retrieving detailed match info.");
+    System.out.println("Retrieving detailed match info...");
     for (WvWMatch m : matches.values()) {
       retrieveMatchInfo(m);
     }
+    System.out.println("Done.");
   }
 
   private Map<Integer, JSONWorldName> retrieveWorldNames() {
@@ -95,7 +104,62 @@ public class GuildWarsServiceRetriever {
     match.setScore(TYPE.GREEN, scores[1]);
     match.setScore(TYPE.BLUE, scores[2]);
 
-    System.out.println(obj);
+    for (JSONWvWMap map : obj.getMaps()) {
+      match.addMap(createMap(map));
+    }
+  }
+
+  private WvWMap createMap(JSONWvWMap jsonMap) {
+    int[] scores = jsonMap.getScores();
+    ArrayList<WvWObjective> objectives = new ArrayList<>();
+    for (JSONWvWObjective objective : jsonMap.getObjectives()) {
+      objectives.add(createWvWObjective(objective));
+    }
+
+    WvWMap map = new WvWMap();
+    map.putScore(TYPE.RED, scores[0]);
+    map.putScore(TYPE.GREEN, scores[1]);
+    map.putScore(TYPE.BLUE, scores[2]);
+    map.setObjectives(objectives);
+    map.setType(parseHomeType(jsonMap.getType()));
+
+    return map;
+  }
+
+  private WvWObjective createWvWObjective(JSONWvWObjective jsonObjective) {
+    WvWObjective objective = new WvWObjective();
+
+    objective.setId(jsonObjective.getId());
+    objective.setOwner(parseType(jsonObjective.getOwner()));
+    objective.setGuild(jsonObjective.getOwnerGuild());
+
+    return objective;
+  }
+
+  private TYPE parseHomeType(String str) {
+    switch (str) {
+    case "redHome":
+      return TYPE.RED;
+    case "greenHome":
+      return TYPE.GREEN;
+    case "blueHome":
+      return TYPE.BLUE;
+    default:
+      return null;
+    }
+  }
+
+  private TYPE parseType(String str) {
+    switch (str) {
+    case "Red":
+      return TYPE.RED;
+    case "Green":
+      return TYPE.GREEN;
+    case "Blue":
+      return TYPE.BLUE;
+    default:
+      return null;
+    }
   }
 
   private void stitch(Map<Integer, JSONWorldName> worldNames, Map<String, JSONWvWMatch> matchOverview) {
@@ -106,7 +170,7 @@ public class GuildWarsServiceRetriever {
       match.addWorld(createWorld(TYPE.BLUE, jsonMatch.getBlueWorldId(), match, worldNames));
       match.addWorld(createWorld(TYPE.RED, jsonMatch.getRedWorldId(), match, worldNames));
 
-      getMatches().put(match.getId(), match);
+      matches.put(match.getId(), match);
     }
   }
 
@@ -117,7 +181,7 @@ public class GuildWarsServiceRetriever {
     world.setName(worldNames.get(worldId).getName());
     world.setMatch(match);
 
-    getWorlds().put(worldId, world);
+    worlds.put(worldId, world);
 
     return world;
   }
